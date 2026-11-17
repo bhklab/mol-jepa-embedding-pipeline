@@ -1,0 +1,4 @@
+HDD:
+    dir: "HDD"
+    colData: "https://zenodo.org/records/22133259/files/colData.tsv?download=1"
+    Tox21: "https://zenodo.org/records/22133259/files/Tox21.tsv?download=1"
