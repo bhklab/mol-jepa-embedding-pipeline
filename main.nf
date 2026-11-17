@@ -95,9 +95,9 @@ Pixi environment. Keep data/work/ and .nextflow/ to resume completed tasks.
         }
 
         if (params.molset) {
-            viability = Channel.value(file(params.molset, checkIfExists: true))
+            molset = Channel.value(file(params.molset, checkIfExists: true))
         } else {
-            viability = CURATE_DRUG_UNIVERSE(downloads, file("${projectDir}/workflow/scripts/fetch_viability.R"))
+            viability = CURATE_DRUG_UNIVERSE(rawdata, file("${projectDir}/workflow/scripts/construct_drug_universe.py"))
         }
 
         GENERATE_EMBEDDINGS(raw_data, viability, embeddings, scripts)
