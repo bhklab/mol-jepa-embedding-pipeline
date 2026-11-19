@@ -46,7 +46,8 @@ parser.add_argument(
 args = parser.parse_args()
 args.outdir.mkdir(parents=True, exist_ok=True)
 
-embs = pd.read_csv(args.embeddings, index_col=0)
+embs = pd.read_csv(args.embeddings, index_col="HDD.Compound.ID")
+embs = embs.loc[:, embs.columns.str.startswith("Emb-")]
 if embs.empty or not embs.index.is_unique or embs.index.hasnans:
     raise ValueError(
         "Embeddings must contain unique, non-missing compound IDs and data"
