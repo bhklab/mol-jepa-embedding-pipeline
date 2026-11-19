@@ -18,6 +18,8 @@ pandas = ">=3.0.6,<4"
 tqdm = ">=4.70.1,<5"
 pyyaml = ">=6.0.3,<7"
 scikit-learn = ">=1.9.1,<2"
+matplotlib-base = ">=3.11.2,<4"
+seaborn-base = ">=0.13.2,<0.14"
 
 [pypi-dependencies]
 transformers = "==4.50.3"
