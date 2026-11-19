@@ -4,7 +4,6 @@ import pandas as pd
 from damply import dirs
 from collections import defaultdict
 import tqdm 
-import functools
 import yaml
 import torch 
 
@@ -25,21 +24,6 @@ else:
 model = AutoModel.from_pretrained("Flogrammer/Mol-JEPA", trust_remote_code=True)
 
 
-# necessary wrapper to catch errors
-def safe_forward_wrapper(original_forward):
-    @functools.wraps(original_forward)
-    def wrapped_forward(*args, **kwargs):
-        try:
-            return original_forward(*args, **kwargs)
-        except ValueError as e:
-            # print(f"⚠️ Transform ValueError intercepted in forward pass: {e}")
-            # Return None or a dummy ModelOutput object depending on downstream needs
-            return None
-    return wrapped_forward
-
-
-
-model.forward = safe_forward_wrapper(model.forward)
 model.to(device)
 model.eval()
 
@@ -56,24 +40,26 @@ drug_data = drug_data[drug_data['HDD.Compound.ID'].isin(mol_universe)]
 
 
 mol_embeddings = defaultdict(list)
+failed = 0
 
-for idx, row in tqdm.tqdm(drug_data.iterrows(),total = drug_data.shape[0]):
-    mol = row['SMILES']
-    
-    out = model([mol])
-    
-    if out is not None:
-        embedding = out.cls.cpu().numpy().squeeze()
+for _, row in tqdm.tqdm(drug_data.iterrows(), total=len(drug_data)):
+    compound_id = row["HDD.Compound.ID"]
+    try:
+        out = model([row["SMILES"]])
+    except ValueError as exc:
+        failed += 1
+        print(f"{compound_id}: {exc}", file=sys.stderr)
+        continue
 
-        mol_embeddings["HDD.Compound.ID"].append(row["HDD.Compound.ID"])
-        mol_embeddings["Pubchem.CID"].append(int(row["Pubchem.CID"]))
-    
-        for i in range(len(embedding)):
-            mol_embeddings[f'Emb-{i+1}'].append(embedding[i])
-    
-    
-mol_embeddings = pd.DataFrame(mol_embeddings)
-mol_embeddings.to_csv(dirs.RESULTS / "molecule_embeddings.csv")
+    embedding = out.cls.cpu().numpy().squeeze()
+    mol_embeddings["HDD.Compound.ID"].append(compound_id)
+    mol_embeddings["Pubchem.CID"].append(int(row["Pubchem.CID"]))
+    for i, value in enumerate(embedding, start=1):
+        mol_embeddings[f"Emb-{i}"].append(value)
 
-    
+count = len(mol_embeddings["HDD.Compound.ID"])
+print(f"Generated {count} embeddings from {len(drug_data)} eligible compounds ({failed} failed).")
+if not count:
+    raise SystemExit("No valid compound embeddings were generated.")
 
+pd.DataFrame(mol_embeddings).to_csv(dirs.RESULTS / "molecule_embeddings.csv")
