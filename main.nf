@@ -26,7 +26,8 @@ process CURATE_DRUG_UNIVERSE {
     publishDir params.outdir, mode: 'copy', overwrite: true
 
     input:
-    path rawdata, stageAs: 'data/rawdata'
+    path raw_data, stageAs: 'data/rawdata'
+    path curator
 
     output:
     path 'data/procdata/molecule_universe.txt', emit: molset
@@ -38,7 +39,7 @@ process CURATE_DRUG_UNIVERSE {
     export DMP_PROJECT_ROOT="\$PWD"
     export OMP_NUM_THREADS=${task.cpus}
     export MKL_NUM_THREADS=${task.cpus}
-    python '${scripts}/construct_drug_universe.py'
+    python '${curator}'
     """
 
 }
@@ -74,14 +75,14 @@ workflow {
         log.info '''
 Run: pixi run pipeline [options] [-resume]
 
-  --raw_data DIR          Reuse downloaded HDD/JUMP/GEOM/LINCS directories
-  --viability FILE        Reuse a prepared NCI60 response CSV
+  --raw_data DIR          Reuse downloaded HDD inputs
+  --molset FILE           Reuse a prepared molecule universe
   --downloads FILE        Download configuration (default: config/downloads.yaml)
   --embeddings FILE       Model configuration (default: config/embeddings.yaml)
   --outdir DIR            Published embeddings (default: data/results/nextflow)
 
-Setup installs PharmacoGx devel before Nextflow starts. Tasks use the active
-Pixi environment. Keep data/work/ and .nextflow/ to resume completed tasks.
+Tasks use the active Pixi environment. Keep data/work/ and .nextflow/
+to resume completed tasks.
 '''
     } else {
         downloads = file(params.downloads, checkIfExists: true)
@@ -97,9 +98,9 @@ Pixi environment. Keep data/work/ and .nextflow/ to resume completed tasks.
         if (params.molset) {
             molset = Channel.value(file(params.molset, checkIfExists: true))
         } else {
-            viability = CURATE_DRUG_UNIVERSE(rawdata, file("${projectDir}/workflow/scripts/construct_drug_universe.py"))
+            molset = CURATE_DRUG_UNIVERSE(raw_data, file("${projectDir}/workflow/scripts/construct_drug_universe.py"))
         }
 
-        GENERATE_EMBEDDINGS(raw_data, viability, embeddings, scripts)
+        GENERATE_EMBEDDINGS(raw_data, molset, embeddings, scripts)
     }
 }
