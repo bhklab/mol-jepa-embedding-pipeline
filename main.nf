@@ -22,7 +22,7 @@ process DOWNLOAD_INPUTS {
 
 process CURATE_DRUG_UNIVERSE {
     cpus 4
-    membory '8 GB'
+    memory '8 GB'
     publishDir params.outdir, mode: 'copy', overwrite: true
 
     input:
