@@ -10,9 +10,7 @@ import re
 from sklearn.cluster import SpectralClustering
 
 
-with open("keep_mols.txt","r") as istream:
-    keep_mols = istream.readlines()
-    keep_mols = [x.rstrip() for x in keep_mols]
+
 
 data = pd.read_csv(dirs.RESULTS / "molecule_embeddings.csv",index_col=0)
 emb_cols = data.columns[2:]
@@ -44,6 +42,6 @@ colData = pd.read_csv(dirs.RAWDATA / "HDD/colData.tsv",
                                   "BBB.Permeable"])
 
 
-print(colData["DILIrank.DILI.Severity.Grade"].value_counts())
-print(colData["DILIrank.DILI.Annotation"].value_counts())
+# print(colData["Livertox.Hepatotoxicity.Likelihood.Score"].value_counts())
+print(colData["DIRIL.Label.Shi"].value_counts())
 

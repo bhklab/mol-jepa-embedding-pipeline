@@ -7,6 +7,8 @@ import os
 from pathlib import Path
 from sklearn.preprocessing import StandardScaler
 import re
+from sklearn.cluster import SpectralClustering
+
 
 with open("keep_mols.txt","r") as istream:
     keep_mols = istream.readlines()
@@ -38,6 +40,8 @@ data = data[data['HDD.Compound.ID'].isin(keep_mols)]
 X = data[emb_cols].values
 # X = [["HS", "E0",  "E_inf", "EC50"]].values 
 X = StandardScaler().fit_transform(X)
+
+
 UM = reducer.fit_transform(X)
 plot_df = pd.DataFrame({'UMAP-1':UM[:,0], 
                         'UMAP-2':UM[:,1],
@@ -53,7 +57,7 @@ plt.close()
 plot_df = pd.DataFrame({'UMAP-1':UM[:,0], 
                         'UMAP-2':UM[:,1],
                         'MOA':data['Mechanism.of.Action'].values})
-ax =  sns.scatterplot(plot_df,x='UMAP-1',y='UMAP-2',hue='MOA',legend=True)
+ax =  sns.scatterplot(plot_df,x='UMAP-1',y='UMAP-2',hue='MOA',legend=False)
 
 plt.title(f"Mol-JEPA Embeddings vs. MOA")
 plt.tight_layout()

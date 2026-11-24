@@ -1,2 +1,2 @@
 PARAMETERS:
-    device: "auto"
+    device: "cpu"

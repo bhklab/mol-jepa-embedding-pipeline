@@ -28,6 +28,7 @@ model.to(device)
 model.eval()
 
 
+
 with open(dirs.PROCDATA /"molecule_universe.txt","r") as istream:
     mol_universe = istream.readlines()
     mol_universe = [x.rstrip() for x in mol_universe]
@@ -41,6 +42,7 @@ drug_data = drug_data[drug_data['HDD.Compound.ID'].isin(mol_universe)]
 
 mol_embeddings = defaultdict(list)
 failed = 0
+shape_log = []
 
 for _, row in tqdm.tqdm(drug_data.iterrows(), total=len(drug_data)):
     compound_id = row["HDD.Compound.ID"]
@@ -51,11 +53,18 @@ for _, row in tqdm.tqdm(drug_data.iterrows(), total=len(drug_data)):
         print(f"{compound_id}: {exc}", file=sys.stderr)
         continue
 
+    
     embedding = out.cls.cpu().numpy().squeeze()
+    shape_log.append(out[0].shape[0])
+    print(f"The shape of the predictions is: {out[0].shape[1]}")
+    print(f"The shape of the embeddings is: {out[2].shape[1]}")
+    
+    
     mol_embeddings["HDD.Compound.ID"].append(compound_id)
     mol_embeddings["Pubchem.CID"].append(int(row["Pubchem.CID"]))
     for i, value in enumerate(embedding, start=1):
         mol_embeddings[f"Emb-{i}"].append(value)
+
 
 count = len(mol_embeddings["HDD.Compound.ID"])
 print(f"Generated {count} embeddings from {len(drug_data)} eligible compounds ({failed} failed).")
