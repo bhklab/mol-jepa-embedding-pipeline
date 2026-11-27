@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Mol-JEPA embedding pipeline",
+  "description": "Generate Mol-JEPA embeddings for HDD compounds.",
+  "type": "object",
+  "definitions": {
+    "inputs": {
+      "title": "Inputs",
+      "type": "object",
+      "properties": {
+        "downloads": {
+          "type": "string",
+          "format": "file-path",
+          "description": "Optional downloads YAML. Defaults to the bundled HDD v3 sources."
+        },
+        "embeddings": {
+          "type": "string",
+          "format": "file-path",
+          "description": "Optional embeddings YAML. Defaults to CPU."
+        },
+        "raw_data": {
+          "type": "string",
+          "format": "directory-path",
+          "description": "Optional directory containing HDD/colData.tsv and HDD/Tox21.tsv. Use a dx://project-ID:/folder URI on DNAnexus."
+        },
+        "molset": {
+          "type": "string",
+          "format": "file-path",
+          "description": "Optional text file with one HDD compound ID per line. Otherwise build the molecule universe."
+        }
+      }
+    },
+    "execution": {
+      "title": "Execution",
+      "type": "object",
+      "properties": {
+        "container_image": {
+          "type": "string",
+          "description": "Docker registry image digest or dx://project-ID:file-ID for a Docker archive. Required on DNAnexus."
+        },
+        "outdir": {
+          "type": "string",
+          "description": "Output subdirectory. Use a relative path on DNAnexus."
+        }
+      }
+    }
+  },
+  "allOf": [
+    { "$ref": "#/definitions/inputs" },
+    { "$ref": "#/definitions/execution" }
+  ]
+}
