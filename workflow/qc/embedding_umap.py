@@ -31,7 +31,7 @@ colData = pd.read_csv(dirs.RAWDATA / "HDD/colData.tsv",
 
 
 
-reducer = umap.UMAP(random_state=42)
+
 data = data.merge(colData, on="HDD.Compound.ID")
 data = data.dropna(subset=['Mechanism.of.Action','ATC.Code'])
 data['ATC.Code']=[process_atc_code(x,2) for x in data['ATC.Code']]
