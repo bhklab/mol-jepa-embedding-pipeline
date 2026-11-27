@@ -5,6 +5,8 @@ platforms = ["osx-arm64","linux-64", "osx-64"]
 version = "0.1.0"
 
 [tasks]
+pipeline = "nextflow run main.nf"
+qc = "bash workflow/scripts/render_qc.sh"
 
 [dependencies]
 python = ">=3.11.5,<3.12"
@@ -26,6 +28,7 @@ bleach = ">=6.4.0,<7"
 tinycss2 = ">=1.4.0,<2"
 lxml = ">=6.1.3,<7"
 beautifulsoup4 = ">=4.15.0,<5"
+nextflow = ">=26.10.7,<27"
 
 [pypi-dependencies]
 transformers = "==4.50.3"

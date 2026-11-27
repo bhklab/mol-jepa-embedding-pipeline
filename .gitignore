@@ -382,3 +382,12 @@ site/
 # models/
 # sandbox/
 # etc.
+
+# Nextflow local run state
+.nextflow/
+.nextflow.log.*
+/data/work/
+/work/
+
+# Local DNAnexus build artifacts
+/data/dnanexus/
