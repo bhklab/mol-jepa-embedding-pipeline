@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="James Bannon" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>DNAnexus - Mol-JEPA Embedding Pipeline</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "DNAnexus";
+        var mkdocs_page_input_path = "dnanexus.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Mol-JEPA Embedding Pipeline
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../usage/">Usage</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">DNAnexus</a>
+    <ul class="current">
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../data_sources/">Data Sources</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../devnotes/">Developer Notes</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Mol-JEPA Embedding Pipeline</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">DNAnexus</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/bhklab/mol-jepa-embedding-pipeline/edit/master/docs/dnanexus.md">Edit on mol-jepa-embedding-pipeline</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="deploying-on-dnanexus">Deploying on DNAnexus</h1>
+<p>The Docker image contains the locked Linux Pixi environment. The applet contains the Nextflow workflow, config, Python scripts, and QC notebook. Build and upload them separately.</p>
+<ol>
+<li>Build a Linux AMD64 image and export it in Docker archive format:</li>
+</ol>
+<p><code>bash
+   mkdir -p data/dnanexus
+   docker build --platform linux/amd64 -t mol-jepa:v1 .
+   docker save -o data/dnanexus/mol-jepa-v1.tar mol-jepa:v1</code></p>
+<p>The current Linux lockfile is CPU-only. The image does not contain the HDD inputs or Mol-JEPA weights. By default the job downloads the HDD files from Zenodo and the model from Hugging Face, which requires outbound network access.</p>
+<ol>
+<li>Upload the archive to a DNAnexus project that can build and run Nextflow applets. Record the returned file ID:</li>
+</ol>
+<p><code>bash
+   dx login
+   dx mkdir -p 'project-PROJECT_ID:/containers'
+   dx mkdir -p 'project-PROJECT_ID:/applets'
+   dx upload data/dnanexus/mol-jepa-v1.tar \
+     --path 'project-PROJECT_ID:/containers/' --brief</code></p>
+<ol>
+<li>Package the source and build the applet. Replace <code>source.XXXXXX</code> with the directory printed by the packaging script:</li>
+</ol>
+<p><code>bash
+   bash workflow/scripts/package_dnanexus.sh
+   dx build --nextflow data/dnanexus/source.XXXXXX \
+     --profile dnanexus --nextflow-version 25.10 \
+     --extra-args '{"name":"mol-jepa-embedding-pipeline","title":"Mol-JEPA Embedding Pipeline","summary":"Generate Mol-JEPA embeddings for HDD compounds."}' \
+     --destination 'project-PROJECT_ID:/applets/mol-jepa-embedding-pipeline'</code></p>
+<ol>
+<li>Run the applet and pass the image file URI. Use a relative <code>outdir</code>. For a first test, upload a small list of eligible HDD IDs (with SMILES and PubChem CID) and pass it as <code>molset</code>:</li>
+</ol>
+<p><code>bash
+   dx run applet-APPLET_ID \
+     -icontainer_image='dx://project-PROJECT_ID:file-IMAGE_ID' \
+     -imolset='project-PROJECT_ID:file-MOLSET_ID' \
+     -ioutdir=results --destination 'project-PROJECT_ID:/'</code></p>
+<p>Check that <code>molecule_embeddings.csv</code> has exactly the test IDs once each and 512 finite values per ID. Open or download the <code>embedding_qc.html</code> output. Small runs omit panels without enough matched labels. Omit <code>molset</code> for the full universe.</p>
+<p>See the <a href="https://documentation.dnanexus.com/user/running-apps-and-workflows/running-nextflow-pipelines">DNAnexus Nextflow guide</a> for platform setup and Docker image options.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../usage/" class="btn btn-neutral float-left" title="Usage"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../data_sources/" class="btn btn-neutral float-right" title="Data Sources">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/bhklab/mol-jepa-embedding-pipeline" class="fa fa-code-fork" style="color: #fcfcfc"> mol-jepa-embedding-pipeline</a>
+        </span>
+    
+    
+      <span><a href="../usage/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../data_sources/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

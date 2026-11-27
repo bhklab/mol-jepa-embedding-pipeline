@@ -46,11 +46,11 @@
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="#">Usage</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#project-configuration">Project Configuration</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#running-your-analysis">Running Your Analysis</a>
-    </li>
     </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../dnanexus/">DNAnexus</a>
                 </li>
               </ul>
               <ul>
@@ -86,18 +86,18 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="usage-guide">Usage Guide</h1>
-<h2 id="project-configuration">Project Configuration</h2>
-<p>TODO:: discuss how to edit the configuration files in the <code>config/</code> directory to match your research parameters</p>
-<p>TODO:: discuss how to add your input data to the <code>data/rawdata/</code> directory and document it properly in the <code>docs/data_sources/</code> directory</p>
-<p>TODO:: discuss how to manage and organize your data sources effectively</p>
-<h2 id="running-your-analysis">Running Your Analysis</h2>
-<p>TODO:: discuss using pixi tasks to run the analysis</p>
+<p>Start with <a href="../#running-with-nextflow">Running with Nextflow</a> for local
+runs, output paths and QC. <code>config/downloads.yaml</code> defines the source tables;
+<code>config/embeddings.yaml</code> selects the compute device. To reuse downloaded
+inputs, pass the directory containing the <code>HDD/</code> subdirectory as
+<code>--raw_data</code>.</p>
+<p>See <a href="../dnanexus/">Deploying on DNAnexus</a> for container and applet commands.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
         <a href=".." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../data_sources/" class="btn btn-neutral float-right" title="Data Sources">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../dnanexus/" class="btn btn-neutral float-right" title="DNAnexus">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -127,7 +127,7 @@
       <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../data_sources/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../dnanexus/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
