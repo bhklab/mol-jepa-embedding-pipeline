@@ -1,13 +1,9 @@
 # Usage Guide
 
-## Project Configuration
+Start with [Running with Nextflow](README.md#running-with-nextflow) for local
+runs, output paths and QC. `config/downloads.yaml` defines the source tables;
+`config/embeddings.yaml` selects the compute device. To reuse downloaded
+inputs, pass the directory containing the `HDD/` subdirectory as
+`--raw_data`.
 
-TODO:: discuss how to edit the configuration files in the `config/` directory to match your research parameters
-
-TODO:: discuss how to add your input data to the `data/rawdata/` directory and document it properly in the `docs/data_sources/` directory
-
-TODO:: discuss how to manage and organize your data sources effectively
-
-## Running Your Analysis
-
-TODO:: discuss using pixi tasks to run the analysis
+See [Deploying on DNAnexus](dnanexus.md) for container and applet commands.
